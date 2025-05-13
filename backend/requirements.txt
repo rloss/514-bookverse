@@ -1,0 +1,19 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+alembic
+pydantic>=2.0
+pydantic-settings
+python-dotenv
+psycopg2-binary
+passlib[bcrypt]
+python-jose[cryptography]
+email-validator
+httpx
+
+# 테스트 및 개발용 (선택)
+pytest
+pytest-asyncio
+black
+isort
+mypy

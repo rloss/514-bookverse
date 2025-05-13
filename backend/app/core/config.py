@@ -1,9 +1,9 @@
-import os
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
-    API_V1_STR: str = "/api/v1"
-    PROJECT_NAME: str = "Bookverse"
-    DATABASE_URL: str = os.getenv("DATABASE_URL")
+    SQLALCHEMY_DATABASE_URL: str
+
+    class Config:
+        env_file = ".env"  # 루트 기준
 
 settings = Settings()
