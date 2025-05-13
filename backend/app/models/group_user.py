@@ -1,26 +1,15 @@
-from sqlalchemy import Column, Enum, DateTime, ForeignKey, UniqueConstraint
+from sqlalchemy import Column, ForeignKey, Enum as SQLEnum, DateTime
 from sqlalchemy.dialects.postgresql import UUID
-import uuid
 from datetime import datetime
 from app.db.base import Base
-
-class GroupUserRole(str, Enum):
-    owner = "owner"
-    admin = "admin"
-    member = "member"
-
-class GroupUserStatus(str, Enum):
-    active = "active"
-    pending = "pending"
-    banned = "banned"
+from app.utils.enums import GroupUserRole, GroupUserStatus
 
 class GroupUser(Base):
     __tablename__ = "group_user"
-    __table_args__ = (UniqueConstraint("group_id", "user_id"),)
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    group_id = Column(UUID(as_uuid=True), ForeignKey("group.id", ondelete="CASCADE"))
-    user_id = Column(UUID(as_uuid=True), ForeignKey("user.id", ondelete="CASCADE"))
-    role = Column(Enum(GroupUserRole), nullable=False)
-    status = Column(Enum(GroupUserStatus), nullable=False)
+    id = Column(UUID(as_uuid=True), primary_key=True)
+    group_id = Column(UUID(as_uuid=True), ForeignKey("group.id", ondelete="CASCADE"), nullable=False)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("user.id", ondelete="CASCADE"), nullable=False)
+    role = Column(SQLEnum(GroupUserRole, name="group_user_role", native_enum=False), nullable=False)
+    status = Column(SQLEnum(GroupUserStatus, name="group_user_status", native_enum=False), nullable=False)
     joined_at = Column(DateTime, default=datetime.utcnow)
