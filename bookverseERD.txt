@@ -1,0 +1,193 @@
+ Bookverse 데이터베이스 ERD v5.0 (2025-05-14 기준)
+1. User
+sql
+복사
+편집
+User (
+  id UUID PK,
+  username VARCHAR NOT NULL,
+  email VARCHAR UNIQUE NOT NULL,
+  hashed_password VARCHAR NOT NULL,
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NOT NULL
+)
+2. SocialAccount
+sql
+복사
+편집
+SocialAccount (
+  id UUID PK,
+  user_id UUID FK → User(id) ON DELETE CASCADE,
+  provider VARCHAR CHECK ('google', 'kakao', 'github', 'naver'),
+  provider_user_id VARCHAR NOT NULL,
+  email VARCHAR,
+  username VARCHAR,
+  profile_image_url VARCHAR,
+  created_at TIMESTAMP NOT NULL,
+  UNIQUE (provider, provider_user_id)
+)
+3. UserProfile
+sql
+복사
+편집
+UserProfile (
+  id UUID PK,
+  user_id UUID FK → User(id) UNIQUE ON DELETE CASCADE,
+  bio TEXT,
+  profile_image_url VARCHAR,
+  website_url VARCHAR,
+  location VARCHAR,
+  created_at TIMESTAMP NOT NULL
+)
+4. Group
+sql
+복사
+편집
+Group (
+  id UUID PK,
+  name VARCHAR NOT NULL,
+  description TEXT,
+  cover_image_url VARCHAR,
+  owner_id UUID FK → User(id) ON DELETE SET NULL,
+  created_at TIMESTAMP NOT NULL
+)
+5. GroupUser
+sql
+복사
+편집
+GroupUser (
+  id UUID PK,
+  group_id UUID FK → Group(id) ON DELETE CASCADE,
+  user_id UUID FK → User(id) ON DELETE CASCADE,
+  role VARCHAR CHECK ('owner', 'admin', 'member') NOT NULL,
+  status VARCHAR CHECK ('active', 'pending', 'banned') NOT NULL,
+  joined_at TIMESTAMP NOT NULL,
+  UNIQUE (group_id, user_id)
+)
+6. Book
+sql
+복사
+편집
+Book (
+  id UUID PK,
+  title VARCHAR NOT NULL,
+  author VARCHAR NOT NULL,
+  publisher VARCHAR,
+  published_date DATE,
+  description TEXT,
+  isbn VARCHAR,
+  image_url VARCHAR
+)
+7. Post
+sql
+복사
+편집
+Post (
+  id UUID PK,
+  author_id UUID FK → User(id) ON DELETE SET NULL,
+  group_id UUID FK → Group(id) ON DELETE SET NULL,
+  activity_id UUID FK → GroupActivity(id) ON DELETE SET NULL,
+  category VARCHAR CHECK ('review', 'announcement', 'community') NOT NULL,
+  visibility VARCHAR CHECK ('public', 'group-only', 'private') NOT NULL,
+  title VARCHAR NOT NULL,
+  content TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NOT NULL
+)
+8. PostBook (N:M)
+sql
+복사
+편집
+PostBook (
+  id UUID PK,
+  post_id UUID FK → Post(id) ON DELETE CASCADE,
+  book_id UUID FK → Book(id) ON DELETE CASCADE,
+  note TEXT,
+  is_primary BOOLEAN DEFAULT FALSE,
+  created_at TIMESTAMP NOT NULL,
+  UNIQUE (post_id, book_id)
+)
+9. Comment
+sql
+복사
+편집
+Comment (
+  id UUID PK,
+  post_id UUID FK → Post(id) ON DELETE CASCADE,
+  author_id UUID FK → User(id) ON DELETE SET NULL,
+  content TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL,
+  updated_at TIMESTAMP NOT NULL
+)
+10. GroupActivity
+sql
+복사
+편집
+GroupActivity (
+  id UUID PK,
+  group_id UUID FK → Group(id) ON DELETE CASCADE,
+  type VARCHAR CHECK ('shared-reading', 'discussion', 'challenge') NOT NULL,
+  title VARCHAR NOT NULL,
+  description TEXT,
+  start_at TIMESTAMP,
+  end_at TIMESTAMP,
+  created_by UUID FK → User(id) ON DELETE SET NULL,
+  status VARCHAR CHECK ('planned', 'active', 'completed') NOT NULL,
+  created_at TIMESTAMP NOT NULL
+)
+11. GroupActivityBook (N:M)
+sql
+복사
+편집
+GroupActivityBook (
+  id UUID PK,
+  activity_id UUID FK → GroupActivity(id) ON DELETE CASCADE,
+  book_id UUID FK → Book(id) ON DELETE CASCADE,
+  selected BOOLEAN DEFAULT FALSE,
+  UNIQUE (activity_id, book_id)
+)
+12. GroupActivityPost
+sql
+복사
+편집
+GroupActivityPost (
+  id UUID PK,
+  activity_id UUID FK → GroupActivity(id) ON DELETE CASCADE,
+  post_id UUID FK → Post(id) ON DELETE CASCADE,
+  book_id UUID FK → Book(id) ON DELETE SET NULL,
+  submitted_at TIMESTAMP NOT NULL,
+  participation_style VARCHAR,
+  UNIQUE (activity_id, post_id)
+)
+13. Schedule
+sql
+복사
+편집
+Schedule (
+  id UUID PK,
+  group_id UUID FK → Group(id) ON DELETE CASCADE,
+  activity_id UUID FK → GroupActivity(id) ON DELETE SET NULL,
+  title VARCHAR NOT NULL,
+  description TEXT,
+  scheduled_date DATE NOT NULL,
+  created_by UUID FK → User(id) ON DELETE SET NULL,
+  created_at TIMESTAMP NOT NULL
+)
+14. GroupActivitySchedule
+sql
+복사
+편집
+GroupActivitySchedule (
+  id UUID PK,
+  activity_id UUID FK → GroupActivity(id) ON DELETE CASCADE,
+  schedule_id UUID FK → Schedule(id) ON DELETE CASCADE,
+  UNIQUE (activity_id, schedule_id)
+)
+✅ 관계 요약
+User → has many → Post, Comment, GroupUser, GroupActivity, Schedule, SocialAccount, UserProfile
+
+Group → has many → GroupUser, Post, GroupActivity, Schedule
+
+Post → has many → Comment, PostBook, (optionally) GroupActivityPost
+
+GroupActivity → has many → GroupActivityBook, GroupActivityPost, GroupActivitySchedule
