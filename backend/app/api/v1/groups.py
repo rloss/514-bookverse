@@ -1,7 +1,10 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+from uuid import UUID
 from app.schemas.group import GroupCreate, GroupRead
-from app.services.group_service import create_group, get_user_groups
+from app.services.group_service import (
+    create_group, get_user_groups, request_to_join_group
+)
 from app.core.security import get_current_user
 from app.db.session import get_db
 from app.models.user import User
@@ -22,3 +25,11 @@ def list_my_groups(
     current_user: User = Depends(get_current_user)
 ):
     return get_user_groups(db, current_user.id)
+
+@router.post("/{group_id}/join")
+def join_group(
+    group_id: UUID,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    return request_to_join_group(db, current_user.id, group_id)

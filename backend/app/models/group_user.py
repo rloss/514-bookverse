@@ -1,8 +1,8 @@
 from sqlalchemy import Column, Enum, DateTime, ForeignKey, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
-from app.db.base import Base
 from datetime import datetime
+from app.db.base import Base
 
 class GroupUserRole(str, Enum):
     owner = "owner"
@@ -16,7 +16,7 @@ class GroupUserStatus(str, Enum):
 
 class GroupUser(Base):
     __tablename__ = "group_user"
-    __table_args__ = (UniqueConstraint("group_id", "user_id"), )
+    __table_args__ = (UniqueConstraint("group_id", "user_id"),)
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     group_id = Column(UUID(as_uuid=True), ForeignKey("group.id", ondelete="CASCADE"))

@@ -1,8 +1,8 @@
 from sqlalchemy import Column, String, Text, DateTime, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
-from app.db.base import Base
 from datetime import datetime
+from app.db.base import Base
 
 class Group(Base):
     __tablename__ = "group"
