@@ -1,10 +1,14 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 from uuid import UUID
+from datetime import datetime
 
-class UserOut(BaseModel):
-    id: UUID
+class UserBase(BaseModel):
     username: str
-    email: str
+    email: EmailStr
+
+class UserRead(UserBase):
+    id: UUID
+    created_at: datetime
 
     class Config:
         orm_mode = True
