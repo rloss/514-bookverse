@@ -6,9 +6,13 @@ class UserBase(BaseModel):
     username: str
     email: EmailStr
 
-class UserRead(UserBase):
+class UserCreate(UserBase):
+    password: str
+
+class UserOut(UserBase):
     id: UUID
     created_at: datetime
+    updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
