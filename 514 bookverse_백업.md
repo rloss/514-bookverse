@@ -16,6 +16,8 @@
 │   │   │       ├── 📄 books.py
 │   │   │       ├── 📄 comments.py
 │   │   │       ├── 📄 groups.py
+│   │   │       ├── 📄 groups_activities.py
+│   │   │       ├── 📄 my.py
 │   │   │       ├── 📄 posts.py
 │   │   │       ├── 📄 schedules.py
 │   │   │       └── 📄 users.py
@@ -64,6 +66,7 @@
 │   │       ├── 📄 hashing.py
 │   │       └── 📄 id_generator.py
 │   ├── 📄 requirements.txt
+│   ├── 📄 setup2.py
 │   └── 📁 tests
 ├── 📄 bookverseERD.txt
 ├── 📁 docs
@@ -624,6 +627,108 @@ websockets==15.0.1
 
 ```
 
+## 📄 `backend\setup2.py`
+
+```python
+import os
+
+# 기본 경로 설정
+BASE_DIR = os.path.join(os.getcwd(), "app", "api", "v1")
+os.makedirs(BASE_DIR, exist_ok=True)
+
+# 라우터 파일들 + 기본 템플릿
+router_templates = {
+    "auth.py": """from fastapi import APIRouter
+
+router = APIRouter()
+
+@router.post("/login")
+async def login():
+    return {"msg": "Login"}
+
+@router.post("/signup")
+async def signup():
+    return {"msg": "Signup"}
+
+@router.get("/me")
+async def get_me():
+    return {"msg": "Current user info"}
+""",
+
+    "users.py": """from fastapi import APIRouter
+
+router = APIRouter()
+
+@router.get("/{user_id}")
+async def get_user(user_id: str):
+    return {"user_id": user_id}
+""",
+
+    "books.py": """from fastapi import APIRouter
+
+router = APIRouter()
+
+@router.get("/")
+async def list_books():
+    return {"books": []}
+""",
+
+    "posts.py": """from fastapi import APIRouter
+
+router = APIRouter()
+
+@router.get("/")
+async def list_posts():
+    return {"posts": []}
+""",
+
+    "comments.py": """from fastapi import APIRouter
+
+router = APIRouter()
+
+@router.post("/")
+async def create_comment():
+    return {"msg": "Comment created"}
+""",
+
+    "groups.py": """from fastapi import APIRouter
+
+router = APIRouter()
+
+@router.post("/")
+async def create_group():
+    return {"msg": "Group created"}
+""",
+
+    "my.py": """from fastapi import APIRouter
+
+router = APIRouter()
+
+@router.get("/my/posts")
+async def my_posts():
+    return {"my_posts": []}
+""",
+
+    "groups_activities.py": """from fastapi import APIRouter
+
+router = APIRouter()
+
+@router.get("/{group_id}/activities")
+async def get_group_activities(group_id: str):
+    return {"group_id": group_id, "activities": []}
+"""
+}
+
+# 파일 생성
+for filename, content in router_templates.items():
+    file_path = os.path.join(BASE_DIR, filename)
+    with open(file_path, "w", encoding="utf-8") as f:
+        f.write(content)
+
+print("✅ API 라우터 파일들 생성 완료.")
+
+```
+
 ## 📄 `backend\app\main.py`
 
 ```python
@@ -649,80 +754,99 @@ app.include_router(groups.router, prefix="/api/v1/groups", tags=["groups"])
 ## 📄 `backend\app\api\v1\auth.py`
 
 ```python
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-from app.db.session import get_db
-from app.schemas.auth import SocialLoginRequest, TokenResponse
-from app.services.auth_service import social_login
+from fastapi import APIRouter
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter()
 
-@router.post("/social-login", response_model=TokenResponse)
-def login_social(request: SocialLoginRequest, db: Session = Depends(get_db)):
-    try:
-        token, user = social_login(request, db)
-        return TokenResponse(access_token=token)
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+@router.post("/login")
+async def login():
+    return {"msg": "Login"}
+
+@router.post("/signup")
+async def signup():
+    return {"msg": "Signup"}
+
+@router.get("/me")
+async def get_me():
+    return {"msg": "Current user info"}
 
 ```
 
 ## 📄 `backend\app\api\v1\books.py`
 
 ```python
+from fastapi import APIRouter
+
+router = APIRouter()
+
+@router.get("/")
+async def list_books():
+    return {"books": []}
 
 ```
 
 ## 📄 `backend\app\api\v1\comments.py`
 
 ```python
+from fastapi import APIRouter
+
+router = APIRouter()
+
+@router.post("/")
+async def create_comment():
+    return {"msg": "Comment created"}
 
 ```
 
 ## 📄 `backend\app\api\v1\groups.py`
 
 ```python
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-from uuid import UUID
-from app.schemas.group import GroupCreate, GroupRead
-from app.services.group_service import (
-    create_group, get_user_groups, request_to_join_group
-)
-from app.core.security import get_current_user
-from app.db.session import get_db
-from app.models.user import User
+from fastapi import APIRouter
 
 router = APIRouter()
 
-@router.post("/", response_model=GroupRead)
-def create_my_group(
-    group_in: GroupCreate,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    return create_group(db, current_user.id, group_in)
+@router.post("/")
+async def create_group():
+    return {"msg": "Group created"}
 
-@router.get("/my", response_model=list[GroupRead])
-def list_my_groups(
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    return get_user_groups(db, current_user.id)
+```
 
-@router.post("/{group_id}/join")
-def join_group(
-    group_id: UUID,
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    return request_to_join_group(db, current_user.id, group_id)
+## 📄 `backend\app\api\v1\groups_activities.py`
+
+```python
+from fastapi import APIRouter
+
+router = APIRouter()
+
+@router.get("/{group_id}/activities")
+async def get_group_activities(group_id: str):
+    return {"group_id": group_id, "activities": []}
+
+```
+
+## 📄 `backend\app\api\v1\my.py`
+
+```python
+from fastapi import APIRouter
+
+router = APIRouter()
+
+@router.get("/my/posts")
+async def my_posts():
+    return {"my_posts": []}
 
 ```
 
 ## 📄 `backend\app\api\v1\posts.py`
 
 ```python
+from fastapi import APIRouter
+
+router = APIRouter()
+
+@router.get("/")
+async def list_posts():
+    return {"posts": []}
 
 ```
 
@@ -735,6 +859,13 @@ def join_group(
 ## 📄 `backend\app\api\v1\users.py`
 
 ```python
+from fastapi import APIRouter
+
+router = APIRouter()
+
+@router.get("/{user_id}")
+async def get_user(user_id: str):
+    return {"user_id": user_id}
 
 ```
 
@@ -873,12 +1004,45 @@ class Base:
 ## 📄 `backend\app\models\book.py`
 
 ```python
+from sqlalchemy import Column, String, Date, Text
+from sqlalchemy.dialects.postgresql import UUID
+import uuid
+
+from app.db.base import Base
+
+class Book(Base):
+    __tablename__ = "book"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    title = Column(String, nullable=False)
+    author = Column(String, nullable=False)
+    publisher = Column(String)
+    published_date = Column(Date)
+    description = Column(Text)
+    isbn = Column(String)
+    image_url = Column(String)
 
 ```
 
 ## 📄 `backend\app\models\comment.py`
 
 ```python
+from sqlalchemy import Column, ForeignKey, Text, DateTime
+from sqlalchemy.dialects.postgresql import UUID
+from datetime import datetime
+import uuid
+
+from app.db.base import Base
+
+class Comment(Base):
+    __tablename__ = "comment"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    post_id = Column(UUID(as_uuid=True), ForeignKey("post.id", ondelete="CASCADE"), nullable=False)
+    author_id = Column(UUID(as_uuid=True), ForeignKey("user.id", ondelete="SET NULL"))
+    content = Column(Text, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow)
 
 ```
 
@@ -980,6 +1144,24 @@ class Post(Base):
 ## 📄 `backend\app\models\schedule.py`
 
 ```python
+from sqlalchemy import Column, String, Text, Date, DateTime, ForeignKey
+from sqlalchemy.dialects.postgresql import UUID
+from datetime import datetime
+import uuid
+
+from app.db.base import Base
+
+class Schedule(Base):
+    __tablename__ = "schedule"
+
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    group_id = Column(UUID(as_uuid=True), ForeignKey("group.id", ondelete="CASCADE"))
+    activity_id = Column(UUID(as_uuid=True), ForeignKey("group_activity.id", ondelete="SET NULL"))
+    title = Column(String, nullable=False)
+    description = Column(Text)
+    scheduled_date = Column(Date, nullable=False)
+    created_by = Column(UUID(as_uuid=True), ForeignKey("user.id", ondelete="SET NULL"))
+    created_at = Column(DateTime, default=datetime.utcnow)
 
 ```
 
@@ -1015,19 +1197,20 @@ class SocialAccount(Base):
 ```python
 from sqlalchemy import Column, String, DateTime
 from sqlalchemy.dialects.postgresql import UUID
-import uuid
-from app.db.base import Base
 from datetime import datetime
+import uuid
+
+from app.db.base import Base
 
 class User(Base):
     __tablename__ = "user"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     username = Column(String, nullable=False)
-    email = Column(String, unique=True, nullable=False)
+    email = Column(String, nullable=False, unique=True)
     hashed_password = Column(String, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow)
 
 ```
 
@@ -1054,12 +1237,52 @@ class TokenResponse(BaseModel):
 ## 📄 `backend\app\schemas\book.py`
 
 ```python
+from pydantic import BaseModel
+from uuid import UUID
+from datetime import date
+
+class BookBase(BaseModel):
+    title: str
+    author: str
+    publisher: str | None = None
+    published_date: date | None = None
+    description: str | None = None
+    isbn: str | None = None
+    image_url: str | None = None
+
+class BookCreate(BookBase):
+    pass
+
+class BookOut(BookBase):
+    id: UUID
+
+    class Config:
+        from_attributes = True
 
 ```
 
 ## 📄 `backend\app\schemas\comment.py`
 
 ```python
+from pydantic import BaseModel
+from uuid import UUID
+from datetime import datetime
+
+class CommentBase(BaseModel):
+    content: str
+
+class CommentCreate(CommentBase):
+    post_id: UUID
+
+class CommentOut(CommentBase):
+    id: UUID
+    post_id: UUID
+    author_id: UUID | None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
 
 ```
 
@@ -1175,6 +1398,28 @@ class PostOut(PostBase):
 ## 📄 `backend\app\schemas\schedule.py`
 
 ```python
+from pydantic import BaseModel
+from uuid import UUID
+from datetime import datetime, date
+
+class ScheduleBase(BaseModel):
+    title: str
+    description: str | None = None
+    scheduled_date: date
+
+class ScheduleCreate(ScheduleBase):
+    group_id: UUID
+    activity_id: UUID | None = None
+
+class ScheduleOut(ScheduleBase):
+    id: UUID
+    group_id: UUID
+    activity_id: UUID | None
+    created_by: UUID | None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
 
 ```
 
@@ -1189,12 +1434,16 @@ class UserBase(BaseModel):
     username: str
     email: EmailStr
 
-class UserRead(UserBase):
+class UserCreate(UserBase):
+    password: str
+
+class UserOut(UserBase):
     id: UUID
     created_at: datetime
+    updated_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 ```
 
