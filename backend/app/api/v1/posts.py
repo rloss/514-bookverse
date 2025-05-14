@@ -1,13 +1,11 @@
-# backend/app/api/v1/posts.py
-
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from sqlalchemy.orm import Session
 from uuid import UUID
 
 from app.db.session import get_db
 from app.core.security import get_current_user
 from app.models.user import User
-from app.schemas.post import PostCreate, PostOut
+from app.schemas.post import PostCreate, PostOut, PostUpdate
 from app.services.post_service import (
     create_post,
     get_all_posts,
@@ -51,11 +49,11 @@ def get_post(
 @router.put("/{post_id}", response_model=PostOut)
 def edit_post(
     post_id: UUID,
-    post_data: PostCreate,  # 단순화를 위해 PostCreate 재활용
+    post_data: PostUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    post = update_post(db, post_id, post_data.dict())
+    post = update_post(db, post_id, post_data.model_dump(exclude_unset=True))
     if not post:
         raise HTTPException(status_code=404, detail="Post not found")
     return post
@@ -70,4 +68,4 @@ def delete_post_api(
     success = delete_post(db, post_id)
     if not success:
         raise HTTPException(status_code=404, detail="Post not found")
-    return
+    return Response(status_code=status.HTTP_204_NO_CONTENT)

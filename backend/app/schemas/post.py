@@ -21,3 +21,9 @@ class PostOut(PostBase):
 
     class Config:
         from_attributes = True
+
+class PostUpdate(BaseModel):
+    title: str | None = None
+    content: str | None = None
+    category: PostCategory | None = None
+    visibility: PostVisibility | None = None

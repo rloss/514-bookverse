@@ -8,7 +8,6 @@ from app.models.schedule import Schedule
 from app.models.book import Book
 from app.models.post import Post
 from app.models.comment import Comment
-# 아래 모델들이 있다면 추가로 여기에 포함시켜야 함
 from app.models.post_book import PostBook
 from app.models.group_activity_book import GroupActivityBook
 from app.models.group_activity_post import GroupActivityPost
@@ -25,7 +24,6 @@ __all__ = [
     "Book",
     "Post",
     "Comment",
-    # 아래 항목들도 필요 시 포함
     "PostBook",
     "GroupActivityBook",
     "GroupActivityPost",
