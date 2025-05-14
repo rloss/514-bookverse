@@ -19,10 +19,11 @@ class UserOut(UserBase):
 
 class UserProfileOut(BaseModel):
     id: UUID
-    bio: str | None
-    profile_image_url: str | None
-    website_url: str | None
-    location: str | None
+    user_id: UUID
+    bio: str | None = None
+    profile_image_url: str | None = None
+    website_url: str | None = None
+    location: str | None = None
     created_at: datetime
 
     class Config:
