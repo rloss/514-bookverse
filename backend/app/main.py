@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from app.api.v1 import (
     auth, books, comments, groups,
     groups_activities, my, posts,
-    users,
+    users, schedules
 )
 
 app = FastAPI()
@@ -24,4 +24,5 @@ app.include_router(groups.router, prefix="/api/v1/groups")
 app.include_router(groups_activities.router, prefix="/api/v1/groups-activities")
 app.include_router(my.router, prefix="/api/v1/my")
 app.include_router(posts.router, prefix="/api/v1/posts")
+app.include_router(schedules.router, prefix="/api/v1/schedules")
 app.include_router(users.router, prefix="/api/v1/users")
