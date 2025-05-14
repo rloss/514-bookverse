@@ -6,7 +6,7 @@ from app.models.user import User
 from app.models.user_profile import UserProfile
 from app.schemas.user import UserProfileOut, UserProfileUpdate
 
-router = APIRouter(prefix="/users/me/profile", tags=["user-profile"])
+router = APIRouter(tags=["user-profile"])
 
 
 @router.get("/", response_model=UserProfileOut)
