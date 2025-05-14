@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.api.v1 import auth, groups
+from app.api.v1 import auth, groups, groups_activities
 
 app = FastAPI()
 
@@ -15,3 +15,4 @@ def root():
 
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(groups.router, prefix="/api/v1/groups", tags=["groups"])
+app.include_router(groups_activities.router, prefix="/api/v1/groups-activities", tags=["activities"])
