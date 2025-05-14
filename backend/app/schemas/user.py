@@ -16,3 +16,14 @@ class UserOut(UserBase):
 
     class Config:
         from_attributes = True
+
+class UserProfileOut(BaseModel):
+    id: UUID
+    bio: str | None
+    profile_image_url: str | None
+    website_url: str | None
+    location: str | None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
