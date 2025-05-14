@@ -17,14 +17,19 @@ class UserOut(UserBase):
     class Config:
         from_attributes = True
 
-class UserProfileOut(BaseModel):
+class UserProfileOut(UserProfileBase):
     id: UUID
     user_id: UUID
-    bio: str | None = None
-    profile_image_url: str | None = None
-    website_url: str | None = None
-    location: str | None = None
     created_at: datetime
 
     class Config:
         from_attributes = True
+
+class UserProfileBase(BaseModel):
+    bio: str | None = None
+    profile_image_url: str | None = None
+    website_url: str | None = None
+    location: str | None = None
+
+class UserProfileUpdate(UserProfileBase):
+    pass
