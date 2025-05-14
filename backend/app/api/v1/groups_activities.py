@@ -12,7 +12,7 @@ from app.services.activity_service import (
     get_activity_detail,
 )
 
-router = APIRouter(prefix="/groups-activities", tags=["activities"])
+router = APIRouter(tags=["activities"])
 
 
 @router.post("/", response_model=GroupActivityOut, status_code=status.HTTP_201_CREATED)

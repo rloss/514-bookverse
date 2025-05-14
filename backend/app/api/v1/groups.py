@@ -6,7 +6,6 @@ from app.db.session import get_db
 from app.core.security import get_current_user
 from app.models.user import User
 from app.schemas.group import GroupCreate, GroupRead, GroupJoinRequest
-from app.schemas.group import GroupJoinRequest
 from app.services.group_service import (
     create_group,
     get_user_groups,
@@ -14,7 +13,7 @@ from app.services.group_service import (
     get_group_by_id,
 )
 
-router = APIRouter(prefix="/groups", tags=["groups"])
+router = APIRouter(tags=["groups"])
 
 
 @router.post("/", response_model=GroupRead, status_code=status.HTTP_201_CREATED)
