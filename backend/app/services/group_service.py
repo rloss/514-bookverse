@@ -40,7 +40,7 @@ def get_group_by_id(db: Session, group_id: UUID):
     return db.query(Group).filter(Group.id == group_id).first()
 
 
-def request_to_join_group(db: Session, user_id: UUID, group_id: UUID):
+def request_to_join_group(db: Session, user_id: UUID, group_id: UUID, message: str | None = None):
     group_user = GroupUser(
         group_id=group_id,
         user_id=user_id,

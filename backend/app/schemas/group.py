@@ -14,3 +14,11 @@ class GroupRead(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+from pydantic import BaseModel
+from uuid import UUID
+
+class GroupJoinRequest(BaseModel):
+    group_id: UUID
+    message: str | None = None

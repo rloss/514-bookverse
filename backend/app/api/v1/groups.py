@@ -6,6 +6,7 @@ from app.db.session import get_db
 from app.core.security import get_current_user
 from app.models.user import User
 from app.schemas.group import GroupCreate, GroupRead, GroupJoinRequest
+from app.schemas.group import GroupJoinRequest
 from app.services.group_service import (
     create_group,
     get_user_groups,
@@ -43,3 +44,16 @@ def join_group(
     if not group:
         raise HTTPException(status_code=404, detail="Group not found")
     return request_to_join_group(db=db, user_id=current_user.id, group_id=group_id)
+
+@router.post("/join")
+def join_group(
+    join_request: GroupJoinRequest,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    return request_to_join_group(
+        db=db,
+        user_id=current_user.id,
+        group_id=join_request.group_id,
+        message=join_request.message
+    )
